@@ -1,4 +1,4 @@
-# Blivechat 横向SC HTML模板 - Blivechat Horizontal SC HTML template
+# Blivechat 横向SC HTML模板 - Horizontal SC HTML template
 
 基于Blivechat默认模板修改的横向SC列表模板，支持点击变灰代表已读，适用于原版Blivechat。
 
