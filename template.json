@@ -1,0 +1,8 @@
+{
+  "name": "Super Chat Ticker",
+  "version": "1.0.0",
+  "author": "kallianx",
+  "description": "默认的仿youtube模板改成横向，而且只保留sc，点击后变灰表示已读",
+  "thumbnail": "",
+  "url": "index.html"
+}

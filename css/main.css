@@ -1,0 +1,190 @@
+html {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "\5FAE \8F6F \96C5 \9ED1 ", "微软雅黑", Arial, sans-serif;
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+/* ============
+   【新增】背景透明   
+============= */
+/* 强制 B站组件容器背景透明 */
+yt-live-chat-renderer {
+  background-color: transparent !important;
+}
+
+/* 隐藏滚动条 */
+yt-live-chat-item-list-renderer #items {
+  overflow: hidden !important;
+}
+
+yt-live-chat-item-list-renderer #item-scroller {
+  overflow: hidden !important;
+}
+
+/* 隐藏标题栏输入框 */
+yt-live-chat-header-renderer,
+yt-live-chat-message-input-renderer {
+  display: none !important;
+}
+
+/* 隐藏下划线 */
+yt-live-chat-text-message-renderer a,
+yt-live-chat-membership-item-renderer a {
+  text-decoration: none !important;
+}
+
+/* ========================
+   横向 SC 盒子专用样式 (V6 修正版)
+   ======================== */
+
+:root {
+  --lcv-move-duration: 0.5s; 
+  --lcv-move-easing: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 1. 外层容器 */
+.sc-horizontal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: auto;
+  min-height: 80px; 
+  z-index: 9999;
+  pointer-events: none; 
+}
+
+/* 2. 列表层 */
+.sc-horizontal-list {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start !important;
+  width: calc(100% + 5px) !important;
+  height: 180px; 
+  overflow: hidden;
+  margin-left: -15px !important;
+  padding: 5px 0 20px 0 !important;
+  pointer-events: auto;
+}
+
+/* 3. 单个卡片包装 (完全隐形，只负责占位) */
+.sc-item-wrapper {
+  margin: 0 5px 0 0 !important;
+  width: 250px;
+  max-width: 250px;
+
+/* 【修正3】固定高度，不再撑满父容器，解决垂直对齐问题 */
+  height: 155px !important;
+
+  flex-shrink: 0;
+  transition: all var(--lcv-move-duration) var(--lcv-move-easing);
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  cursor: pointer;
+
+  position: relative;
+
+/* 确保占位符本身没有样式干扰 */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ========================
+   内部组件样式修正 (解决间隙和双重边框)
+   ======================== */
+/* 【修正4】使用更暴力的选择器清除组件自带边距 */
+.sc-item-wrapper > *,
+.sc-item-wrapper yt-live-chat-paid-message-renderer {
+  margin: 0 !important; /* 核心：清除65px间隙 */
+  width: 100% !important;
+  height: 100% !important;
+  
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ========================
+   字体与内容修正 (解决字体不缩小问题)
+   ======================== */
+/* 针对 SC 内容文字的超强力覆盖 */
+/* 增加选择器权重，确保一定能覆盖默认样式 */
+.sc-item-wrapper yt-live-chat-paid-message-renderer #content,
+.sc-item-wrapper #content,
+.sc-item-wrapper .active-message {
+  /* 读取变量，默认 15px */
+  font-size: var(--dynamic-font-size, 15px) !important;
+  line-height: 1.35 !important;
+  
+  white-space: pre-wrap !important; /* 允许换行 */
+  word-wrap: break-word !important;
+  word-break: break-all !important; /* 防止长英文单词撑破布局 */
+  
+  overflow: hidden !important;
+  display: block !important;
+  
+  /* 【修正2】确保文字垂直居中 */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* ========================
+   完美复刻竖向模板动画 (Vue版)
+   ======================== */
+/* 1. 进场起点：对应 keyframes 的 0% */
+.list-enter-from {
+  opacity: 0;
+  transform: translateX(-16px); /* 从左边 16px 处滑入 */
+}
+
+/* 2. 离场终点：对应 keyframes 的 100% */
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(16px); /* 向右边 16px 处滑出 */
+  
+  /* 【关键细节】竖向模板里消息消失是不占位的，但在横向队列里，
+     我们希望它消失的瞬间不要瞬间腾出空位，而是平滑消失。
+     保持 transform 即可。 */
+}
+
+/* 3. 动画过程：对应 keyframes 的 0% -> 0.6% 和 99% -> 100% 的时间段 */
+/* 这里我们用 0.5s (500ms) 来模拟那个快速滑动的过程，比竖向模板稍微慢一点点会更优雅 */
+.list-enter-active, .list-leave-active {
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 4. 离场时脱离文档流 (必须保留) */
+.list-leave-active {
+  position: absolute; 
+}
+
+/* 鼠标穿透 */
+.sc-item-wrapper * {
+  pointer-events: auto !important;
+}
+
+/* 已读状态 */
+.sc-item-wrapper.is-read {
+  filter: grayscale(100%) opacity(0.6) !important;
+  transform: scale(0.96);
+}
+
+/* ========================
+   隐藏旧的竖向列表 (解决背景里有礼物条滚动的问题)
+   ======================== */
+/* 隐藏竖向滚动区域 */
+yt-live-chat-item-list-renderer {
+  display: none !important;
+}
+
+/* 再次确保原来的 ticker 容器也不显示 (虽然模板里删了，以防万一) */
+yt-live-chat-ticker-renderer {
+  display: none !important;
+}
